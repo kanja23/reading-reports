@@ -40,12 +40,13 @@ with app.app_context():
     # Create sample staff if none exist
     if Staff.query.count() == 0:
         sample_staff = [
-            Staff(staff_number='001', name='Martin Mackenzie', pin='0001', role='reader', email='martin.mackenzie@kenyapower.co.ke'),
+            Staff(staff_number='53050', name='Martin Mackenzie', pin='5305', role='reader', email='martin.mackenzie@kenyapower.co.ke'),
             Staff(staff_number='002', name='Arnold Chogo', pin='0002', role='reader', email='arnold.chogo@kenyapower.co.ke'),
-            Staff(staff_number='003', name='Samwel Nyamori', pin='0003', role='reader', email='samwel.nyamori@kenyapower.co.ke'),
-            Staff(staff_number='013', name='Godfrey Kopilo', pin='0013', role='supervisor', email='godfrey.kopilo@kenyapower.co.ke'),
+            Staff(staff_number='86002', name='Samwel Nyamori', pin='8600', role='reader', email='samwel.nyamori@kenyapower.co.ke'),
+            Staff(staff_number='16957', name='Godfrey Kopilo', pin='1695', role='supervisor', email='godfrey.kopilo@kenyapower.co.ke'),
             Staff(staff_number='014', name='Paul Odhiambo', pin='0014', role='supervisor', email='paul.odhiambo@kenyapower.co.ke'),
             Staff(staff_number='015', name='Cynthia Odhiambo', pin='0015', role='engineer', email='cynthia.odhiambo@kenyapower.co.ke'),
+            Staff(staff_number='84184', name='Adam Sudi', pin='8418', role='engineer', email='adam.sudi@kenyapower.co.ke'),
         ]
         
         for staff in sample_staff:
