@@ -6,55 +6,68 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 from src.models.user import db
-from src.models.staff import Staff
-from src.models.meter_reading import MeterReading
-from src.models.anomaly import Anomaly
 from src.routes.user import user_bp
 from src.routes.auth import auth_bp
-from src.routes.readings import readings_bp
-from src.routes.anomalies import anomalies_bp
 from src.routes.reports import reports_bp
+from src.routes.anomalies import anomalies_bp
+from src.routes.email_service import email_bp
+
+from src.routes.dashboard import dashboard_bp
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 app.config['SECRET_KEY'] = 'asdf#FGSgvasgf$5$WGT'
 
 # Enable CORS for all routes
-CORS(app, supports_credentials=True)
+CORS(app, origins="*")
 
 # Register blueprints
 app.register_blueprint(user_bp, url_prefix='/api')
-app.register_blueprint(auth_bp, url_prefix='/api/auth')
-app.register_blueprint(readings_bp, url_prefix='/api')
-app.register_blueprint(anomalies_bp, url_prefix='/api')
+app.register_blueprint(auth_bp, url_prefix='/api')
 app.register_blueprint(reports_bp, url_prefix='/api')
+app.register_blueprint(anomalies_bp, url_prefix='/api')
+app.register_blueprint(dashboard_bp, url_prefix='/api')
+app.register_blueprint(email_bp, url_prefix='/api')
 
 # Database configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'database', 'app.db')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
-# Initialize database and create sample data
 with app.app_context():
     db.create_all()
     
-    # Create sample staff if none exist
-    if Staff.query.count() == 0:
-        sample_staff = [
-            Staff(staff_number='53050', name='Martin Mackenzie', pin='5305', role='reader', email='martin.mackenzie@kenyapower.co.ke'),
-            Staff(staff_number='002', name='Arnold Chogo', pin='0002', role='reader', email='arnold.chogo@kenyapower.co.ke'),
-            Staff(staff_number='86002', name='Samwel Nyamori', pin='8600', role='reader', email='samwel.nyamori@kenyapower.co.ke'),
-            Staff(staff_number='16957', name='Godfrey Kopilo', pin='1695', role='supervisor', email='godfrey.kopilo@kenyapower.co.ke'),
-            Staff(staff_number='014', name='Paul Odhiambo', pin='0014', role='supervisor', email='paul.odhiambo@kenyapower.co.ke'),
-            Staff(staff_number='015', name='Cynthia Odhiambo', pin='0015', role='engineer', email='cynthia.odhiambo@kenyapower.co.ke'),
-            Staff(staff_number='84184', name='Adam Sudi', pin='8418', role='engineer', email='adam.sudi@kenyapower.co.ke'),
-        ]
-        
-        for staff in sample_staff:
-            staff.security_question = "What is your mother's maiden name?"
-            staff.security_answer = "sample"
-            db.session.add(staff)
-        
-        db.session.commit()
+    # Initialize default users if they don't exist
+    from src.models.user import User
+    
+    default_users = [
+        {'staff_number': '85891', 'role': 'Meter Reader'},
+        {'staff_number': '80909', 'role': 'Meter Reader'},  # Omweri
+        {'staff_number': '86002', 'role': 'Meter Reader'},  # Samwel
+        {'staff_number': '53050', 'role': 'Meter Reader'},  # Mackenzie
+        {'staff_number': '85915', 'role': 'Back Office'},   # Moenga
+        {'staff_number': '84184', 'role': 'Meter Reader'},  # Sudi
+        {'staff_number': '12345', 'role': 'Supervisor'},    # Sample supervisor
+        {'staff_number': '67890', 'role': 'Commercial Engineer'}  # Sample commercial engineer
+    ]
+    
+    for user_data in default_users:
+        existing_user = User.query.filter_by(staff_number=user_data['staff_number']).first()
+        if not existing_user:
+            user = User(
+                staff_number=user_data['staff_number'],
+                role=user_data['role']
+            )
+            # Set PIN as first 4 digits of staff number
+            pin = user_data['staff_number'][:4]
+            user.set_pin(pin)
+            
+            # Set default security question and answer
+            user.security_question = "What is your staff number?"
+            user.set_security_answer(user_data['staff_number'])
+            
+            db.session.add(user)
+    
+    db.session.commit()
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
@@ -75,3 +88,4 @@ def serve(path):
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
+
