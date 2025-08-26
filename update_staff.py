@@ -23,7 +23,8 @@ def update_staff_database():
             {'staff_number': '86002', 'name': 'Samwel', 'role': 'reader'},
             {'staff_number': '53050', 'name': 'Mackenzie', 'role': 'reader'},
             {'staff_number': '85915', 'name': 'Moenga', 'role': 'reader'},
-            {'staff_number': '16957', 'name': 'Moenga', 'role': 'Supervisor'},
+            {'staff_number': '16957', 'name': 'Kopilo', 'role': 'Supervisor'},
+            {'staff_number': '84184', 'name': 'Sudi', 'role': 'reader'},
         ]
         
         for member in staff_members:
